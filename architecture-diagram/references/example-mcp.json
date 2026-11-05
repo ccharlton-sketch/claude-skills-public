@@ -1,0 +1,288 @@
+{
+  "meta": {
+    "slug": "contoso",
+    "account": "Contoso",
+    "title": "ChatGPT as the front door to Contoso data",
+    "subtitle": "Contoso people work in ChatGPT Enterprise. MCP servers connect it to the Azure data lake and to Salesforce. People who live in Salesforce use Coworker there.",
+    "updated": "November 2026"
+  },
+  "zones": [
+    {
+      "id": "people",
+      "label": "People",
+      "nodes": [
+        {
+          "id": "emp",
+          "title": "Contoso employees",
+          "sub": "ChatGPT Enterprise is the everyday interface across the company",
+          "gap_before": 10,
+          "icon": "lucide:users"
+        },
+        {
+          "id": "sfu",
+          "title": "Salesforce-first users",
+          "sub": "Teams who already work in Salesforce all day",
+          "gap_before": 210,
+          "icon": "lucide:user-round",
+          "badge": "logos:salesforce"
+        }
+      ]
+    },
+    {
+      "id": "work",
+      "label": "Where they work",
+      "nodes": [
+        {
+          "id": "gpt",
+          "title": "ChatGPT Enterprise",
+          "kind": "list",
+          "sub": "Skills built with Contoso on the MCP servers",
+          "items": [
+            {
+              "label": "Activity capture",
+              "icon": "lucide:sparkles"
+            },
+            {
+              "label": "Investor intent and deal fit",
+              "icon": "lucide:sparkles"
+            },
+            {
+              "label": "Data quality upkeep",
+              "icon": "lucide:sparkles"
+            }
+          ],
+          "icon": "logos:openai-icon"
+        },
+        {
+          "id": "react",
+          "title": "Contoso React app",
+          "state": "planned",
+          "tag": "PLANNED",
+          "sub": "Custom app built on Salesforce's React support",
+          "gap_before": 90,
+          "icon": "logos:react"
+        }
+      ]
+    },
+    {
+      "id": "mcp",
+      "label": "MCP connection layer",
+      "nodes": [
+        {
+          "id": "azmcp",
+          "title": "Azure data lake MCP",
+          "sub": "Contoso-built MCP server over their own data",
+          "state": "planned",
+          "tag": "PLANNED",
+          "icon": "logos:azure-icon",
+          "badge": "logos:model-context-protocol-icon"
+        },
+        {
+          "id": "sfmcp",
+          "title": "Salesforce hosted MCP",
+          "kind": "list",
+          "sub": "Standard servers, signed in per user",
+          "items": [
+            {
+              "label": "sobject-reads",
+              "mono": true
+            },
+            {
+              "label": "sobject-mutations",
+              "mono": true
+            },
+            {
+              "label": "sobject-deletes",
+              "mono": true
+            },
+            {
+              "label": "sobject-all",
+              "mono": true
+            },
+            {
+              "label": "api-context",
+              "mono": true
+            }
+          ],
+          "icon": "logos:salesforce",
+          "badge": "logos:model-context-protocol-icon"
+        },
+        {
+          "id": "h360",
+          "title": "Headless 360 MCP",
+          "state": "planned",
+          "tag": "NEXT",
+          "sub": "One server for the same work, replacing the standard set",
+          "icon": "logos:salesforce",
+          "badge": "logos:model-context-protocol-icon"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "label": "Systems of record",
+      "nodes": [
+        {
+          "id": "adl",
+          "title": "Azure data lake",
+          "sub": "Contoso's own data platform",
+          "icon": "logos:azure-icon",
+          "badge": "lucide:database"
+        },
+        {
+          "id": "d360",
+          "title": "Data 360",
+          "state": "exploring",
+          "tag": "EXPLORING",
+          "sub": "Unified profiles, discussed with the data team",
+          "gap_before": 0,
+          "icon": "logos:salesforce",
+          "badge": "lucide:database"
+        },
+        {
+          "id": "sforg",
+          "title": "Salesforce",
+          "kind": "list",
+          "sub": "Each call runs as the signed-in user",
+          "items": [
+            {
+              "label": "CRM records and activity",
+              "icon": "lucide:database"
+            },
+            {
+              "label": "Agentforce Coworker",
+              "icon": "lucide:bot"
+            },
+            {
+              "label": "Permissions and sharing",
+              "icon": "lucide:shield-check"
+            }
+          ],
+          "icon": "logos:salesforce"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "emp",
+      "to": "gpt",
+      "step": 1
+    },
+    {
+      "from": "gpt",
+      "to": "azmcp",
+      "step": 2,
+      "dy_from": -30,
+      "state": "planned"
+    },
+    {
+      "from": "azmcp",
+      "to": "adl",
+      "state": "planned"
+    },
+    {
+      "from": "gpt",
+      "to": "sfmcp",
+      "step": 3
+    },
+    {
+      "from": "sfmcp",
+      "to": "sforg",
+      "step": 4,
+      "both": true
+    },
+    {
+      "from": "sfu",
+      "to": "sforg",
+      "step": 5,
+      "route": "bottom",
+      "dx_to": 40,
+      "lane": 0
+    },
+    {
+      "from": "gpt",
+      "to": "h360",
+      "state": "planned",
+      "step": 6,
+      "dy_from": 40
+    },
+    {
+      "from": "h360",
+      "to": "sforg",
+      "state": "planned",
+      "dy_to": 40
+    },
+    {
+      "from": "react",
+      "to": "sforg",
+      "state": "planned",
+      "step": 7,
+      "route": "bottom",
+      "lane": 1,
+      "dx_to": -40
+    },
+    {
+      "from": "d360",
+      "to": "sforg",
+      "state": "exploring"
+    }
+  ],
+  "steps": [
+    {
+      "n": 1,
+      "title": "People ask in ChatGPT",
+      "text": "Contoso employees work in ChatGPT Enterprise and use skills for activity capture, investor intent and data quality."
+    },
+    {
+      "n": 2,
+      "title": "Planned: ChatGPT reads the data lake",
+      "text": "A Contoso-built MCP server gives ChatGPT access to data in the Azure data lake.",
+      "state": "planned"
+    },
+    {
+      "n": 3,
+      "title": "ChatGPT calls Salesforce",
+      "text": "The standard hosted MCP servers expose Salesforce records. Each person signs in with their own Salesforce login."
+    },
+    {
+      "n": 4,
+      "title": "Salesforce enforces access",
+      "text": "Every read or write runs as that user, so field security, object permissions and sharing rules still apply."
+    },
+    {
+      "n": 5,
+      "title": "Coworker inside Salesforce",
+      "text": "People who live in Salesforce get the same help from Agentforce Coworker without leaving the app."
+    },
+    {
+      "n": 6,
+      "title": "Next: Headless 360 MCP",
+      "state": "planned",
+      "text": "Move from the set of standard servers to the Headless 360 MCP server once it is generally available."
+    },
+    {
+      "n": 7,
+      "title": "Planned: Contoso React app",
+      "state": "planned",
+      "text": "A custom React app on Salesforce for experiences that need their own screens."
+    }
+  ],
+  "cards_title": "Today and next",
+  "cards": [
+    {
+      "title": "In place today",
+      "text": "ChatGPT Enterprise connected to Salesforce through the standard MCP servers, skills built at the on-site, and Coworker enabled for Salesforce users."
+    },
+    {
+      "title": "Next",
+      "state": "planned",
+      "text": "Headless 360 MCP server, the Azure data lake MCP server and the Contoso React app."
+    },
+    {
+      "title": "Worth deciding early",
+      "state": "exploring",
+      "text": "Which skills may write to Salesforce, and how those changes are tracked. Start read-only with sobject-reads and widen access skill by skill."
+    }
+  ]
+}

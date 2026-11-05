@@ -1,0 +1,93 @@
+{% extends "_base.html.j2" %}
+{% import "_macros.html.j2" as ui %}
+{% block title %}{{ m.account }} | Engagement retrospective (internal){% endblock %}
+{% block crumbs %}<span class="tag">Internal only</span><span>{{ m.program or "Builder Engagement" }}</span><span>{{ m.record_label or ("Case " ~ m.case_number) }}</span>{% endblock %}
+{% block h1 %}{{ m.account_short or m.account }}: engagement retrospective{% endblock %}
+{% block lede %}{% endblock %}
+{% block top %}{% if m.headline %}<aside class="highlights" aria-labelledby="h-highlights">
+  <h2 id="h-highlights">Highlights</h2>
+  <p>{{ m.headline }}</p>
+</aside>{% endif %}{% endblock %}
+{% block body %}
+<nav class="toc" aria-label="Sections"><ol>
+  <li><a href="#snapshot">Snapshot</a></li><li><a href="#requested">What was requested</a></li>
+  <li><a href="#built">What we built</a></li><li><a href="#hard">Where it got hard</a></li>
+  <li><a href="#learned">What worked, what we'd change</a></li><li><a href="#headed">Where the customer is headed</a></li>
+  <li><a href="#internal">Internal notes</a></li>
+</ol></nav>
+
+<section id="snapshot" aria-labelledby="h-snapshot">
+  <h2 id="h-snapshot">Snapshot</h2>
+  <table class="kv">
+    <tr><th scope="row">Account</th><td>{{ m.account }}</td></tr>
+    <tr><th scope="row">Engagement</th><td>{{ m.title }} <span class="pill">{{ m.engagement_type }}</span></td></tr>
+    {% set pcls = {"live_production": "prod-live", "live_sandbox": "prod-sbx", "cancelled": "prod-no"} %}{% set plabel = {"live_production": "reached production", "live_sandbox": "reached sandbox, not yet production", "cancelled": "was cancelled", "planned": "is planned, not started", "paused": "is paused", "in_build": "is in build"} %}
+    {% if m.products %}<tr><th scope="row">Agentforce products</th><td>{% for x in m.products %}{% set n = x.name if x is mapping else x %}{% set s = x.status if x is mapping else "" %}<span class="prod-wrap"><button type="button" class="pill prod {{ pcls.get(s, '') }}" onclick="this.parentNode.classList.toggle('open')">{{ n }}</button>{% set r = {"live_production": "production", "live_sandbox": "sandbox"}.get(x.reached if x is mapping else "", "") %}<span class="prod-pop">{% if r and s in ("cancelled", "paused") %}{{ n }} reached {{ r }}, then was {{ "cancelled" if s == "cancelled" else "paused" }}.{% else %}{{ n }} {{ plabel.get(s, 'is not in sandbox or production') }}.{% endif %}</span></span> {% endfor %}</td></tr>{% endif %}
+    {% if m.related_platform %}<tr><th scope="row">Related platform</th><td>{% for x in m.related_platform %}{% set n = x.name if x is mapping else x %}{% set s = x.status if x is mapping else "" %}<span class="prod-wrap"><button type="button" class="pill prod {{ pcls.get(s, '') }}" onclick="this.parentNode.classList.toggle('open')">{{ n }}</button>{% set r = {"live_production": "production", "live_sandbox": "sandbox"}.get(x.reached if x is mapping else "", "") %}<span class="prod-pop">{% if r and s in ("cancelled", "paused") %}{{ n }} reached {{ r }}, then was {{ "cancelled" if s == "cancelled" else "paused" }}.{% else %}{{ n }} {{ plabel.get(s, 'is not in sandbox or production') }}.{% endif %}</span></span> {% endfor %}</td></tr>{% endif %}
+    <tr><th scope="row">Dates</th><td>{{ m.dates.start }} to {{ m.dates.end }}{% if m.dates.duration %} ({{ m.dates.duration }}){% endif %}</td></tr>
+    {% if m.opp %}<tr><th scope="row">Opportunity</th><td>{{ m.opp.name }}: {{ m.opp.stage }}{% if m.opp.amount %}, {{ m.opp.amount }}{% endif %}{% if m.opp.close %}, close {{ m.opp.close }}{% endif %}{% if m.opp.owner %} (AE {{ m.opp.owner }}){% endif %}</td></tr>{% endif %}
+    <tr><th scope="row">Team</th><td>{% for t in m.team %}{{ t.name }}, {{ t.role }}{% if t.allocation %} ({{ t.allocation }}){% endif %}{% if not loop.last %}<br>{% endif %}{% endfor %}</td></tr>
+    {% if m.customer_contacts %}<tr><th scope="row">Customer contacts</th><td>{% for c in m.customer_contacts %}{{ c.name }}{% if c.title %}, {{ c.title }}{% endif %}{% if not loop.last %}<br>{% endif %}{% endfor %}</td></tr>{% endif %}
+    {% if m.case_badge %}<tr><th scope="row">{{ m.case_badge.heading }}</th><td><span class="pill {{ m.case_badge.cls }}">{{ m.case_badge.label }}</span>{% if m.case_badge.detail %} <span class="muted">{{ m.case_badge.detail }}</span>{% endif %}</td></tr>{% endif %}
+    <tr><th scope="row">Outcome</th><td>{{ ui.pill(m.outcome_status) }} {{ m.outcome_summary }}</td></tr>
+    <tr><th scope="row">Records</th><td><a href="{{ m.case_url }}">{{ m.record_label or ("Case " ~ m.case_number) }}</a>{% for d in m.dsrs %} · {{ d }}{% endfor %}</td></tr>
+  </table>
+  {% for q in quotes %}<blockquote>“{{ q.text }}”<cite>{{ q.who }}</cite></blockquote>{% endfor %}
+</section>
+
+<section id="requested" aria-labelledby="h-req">
+  <h2 id="h-req">What was requested</h2>
+  <p class="lede">{{ request.summary }}</p>
+  {% if request.goals %}<h3>Goals at intake</h3><ul class="clean">{% for g in request.goals %}<li>{{ g.text }}</li>{% endfor %}</ul>{% endif %}
+  {% if request.success_criteria %}<h3>How success was defined</h3><ul class="clean">{% for g in request.success_criteria %}<li>{{ g.text }}</li>{% endfor %}</ul>{% endif %}
+  {% if request.out_of_scope %}<h3>Out of scope</h3><ul class="clean">{% for g in request.out_of_scope %}<li>{{ g.text }}</li>{% endfor %}</ul>{% endif %}
+</section>
+
+<section id="built" aria-labelledby="h-built">
+  <h2 id="h-built">What we built</h2>
+  <table><thead><tr><th scope="col">Piece</th><th scope="col">Status</th><th scope="col">What it does</th></tr></thead><tbody>
+  {% for b in built %}<tr><td><b>{{ b.name }}</b></td><td>{{ ui.pill(b.status) }}</td><td>{{ b.what }}</td></tr>{% endfor %}
+  </tbody></table>
+  {% if m.video and m.video.id %}<p>Demo recording: <a href="{{ m.video.watch_url }}">{{ m.video.title or "Vidyard demo" }}</a></p>{% endif %}
+  <h3>Timeline</h3>
+  <ol class="timeline">{% for t in timeline %}<li><time>{{ t.date }}</time><span>{{ t.event }}</span></li>{% endfor %}</ol>
+</section>
+
+<section id="hard" aria-labelledby="h-hard">
+  <h2 id="h-hard">Where it got hard</h2>
+  {% for c in challenges %}<div class="item">
+    <h3>{{ c.title }}</h3><p>{{ c.detail }}</p>
+    {% if c.tried %}<div class="meta"><b>What we tried:</b> {{ c.tried }}</div>{% endif %}
+    {% if c.result %}<div class="meta"><b>Result:</b> {{ c.result }}</div>{% endif %}
+  </div>{% endfor %}
+</section>
+
+<section id="learned" aria-labelledby="h-learned">
+  <h2 id="h-learned">What worked, what we'd change</h2>
+  <h3>What worked</h3>
+  {% for w in worked %}<div class="item"><p style="margin:0">{{ w.point }}</p>{% if w.takeaway %}<div class="takeaway"><b>Takeaway:</b> {{ w.takeaway }}</div>{% endif %}</div>{% endfor %}
+  <h3>What we'd change</h3>
+  {% for w in change %}<div class="item"><p style="margin:0">{{ w.point }}</p>{% if w.takeaway %}<div class="takeaway"><b>Next time:</b> {{ w.takeaway }}</div>{% endif %}</div>{% endfor %}
+  {% if lessons %}<h3>Field learnings for the team</h3><ul class="clean">{% for l in lessons %}<li>{{ l.text }}</li>{% endfor %}</ul>{% endif %}
+</section>
+
+<section id="headed" aria-labelledby="h-headed">
+  <h2 id="h-headed">Where the customer is headed</h2>
+  <p class="lede">{{ direction.summary }}</p>
+  {% if readiness %}<h3>Production readiness</h3><table><thead><tr><th scope="col">Area</th><th scope="col">Rating</th><th scope="col">Why</th></tr></thead><tbody>
+  {% for r in readiness %}<tr><td>{{ r.area }}</td><td>{{ ui.pill(r.rating) }}</td><td>{{ r.note }}</td></tr>{% endfor %}</tbody></table>{% endif %}
+  <h3>Open items and next steps</h3>
+  <table><thead><tr><th scope="col">Step</th><th scope="col">Owner</th><th scope="col">By</th></tr></thead><tbody>
+  {% for s in next_steps %}<tr><td>{{ s.step }}</td><td>{{ s.owner }}</td><td>{{ s.date or "TBD" }}</td></tr>{% endfor %}</tbody></table>
+  {% if checkin %}<p><b>90-day check-in:</b> {{ checkin.date or "Not scheduled" }}, led by {{ checkin.owner }}.</p>{% endif %}
+</section>
+
+<section id="internal" aria-labelledby="h-int">
+  <h2 id="h-int">Internal notes</h2>
+  <div class="callout internal"><span class="label">Account risk read</span>{{ internal_notes.risk_read }}</div>
+  {% if internal_notes.build_notes %}<h3>{{ internal_notes.build_notes_title or "How the build works" }}</h3><ul class="clean">{% for b in internal_notes.build_notes %}<li><b>{{ b.title }}.</b> {{ b.text }}</li>{% endfor %}</ul>{% endif %}
+  {% if internal_notes.followups %}<h3>Follow-ups for the account team</h3><ul class="clean">{% for f in internal_notes.followups %}<li>{{ f.text }}</li>{% endfor %}</ul>{% endif %}
+</section>
+
+{% endblock %}
+{% block footer %}Internal only. Built from {{ m.record_label or ("Case " ~ m.case_number ~ ", its comments and allocations") }}, related DSRs, logged activity and Slack threads. Do not share outside Salesforce.{% endblock %}

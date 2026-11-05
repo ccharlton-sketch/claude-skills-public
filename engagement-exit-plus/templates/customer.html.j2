@@ -1,0 +1,60 @@
+{% extends "_base.html.j2" %}
+{% import "_macros.html.j2" as ui %}
+{% block title %}{{ m.account_short or m.account }} and Salesforce | Engagement recap{% endblock %}
+{% block crumbs %}<span>{{ m.account_short or m.account }} + Salesforce</span><span>Engagement recap</span>{% endblock %}
+{% block h1 %}{{ m.customer_title or (m.title ~ ": what we built together") }}{% endblock %}
+{% block lede %}{{ m.customer_headline or m.headline }}{% endblock %}
+{% block body %}
+<nav class="toc" aria-label="Sections"><ol>
+  <li><a href="#why">Why we started</a></li><li><a href="#built">What we built together</a></li>
+  <li><a href="#learned">What we learned</a></li>{% if value %}<li><a href="#value">Value so far</a></li>{% endif %}
+  {% if readiness %}<li><a href="#ready">Production readiness</a></li>{% endif %}<li><a href="#next">What's next</a></li>
+</ol></nav>
+
+<section id="why" aria-labelledby="h-why">
+  <h2 id="h-why">Why we started</h2>
+  <p class="lede">{{ request.summary }}</p>
+  {% if request.goals %}<ul class="clean">{% for g in request.goals %}<li>{{ g.text }}</li>{% endfor %}</ul>{% endif %}
+  {% for q in quotes %}<blockquote>“{{ q.text }}”<cite>{{ q.who }}</cite></blockquote>{% endfor %}
+</section>
+
+<section id="built" aria-labelledby="h-built">
+  <h2 id="h-built">What we built together</h2>
+  {% if m.video and m.video.id %}
+  <div class="video"><iframe src="https://play.vidyard.com/{{ m.video.id }}?disable_popouts=1" title="{{ m.video.title or 'Demo recording' }}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+  <p class="video-print"><img src="https://play.vidyard.com/{{ m.video.id }}.jpg" alt="Thumbnail of the demo recording" style="max-width:60%;border:1px solid var(--rule)"><br>Watch the demo: <a href="{{ m.video.watch_url }}">{{ m.video.watch_url }}</a></p>
+  {% endif %}
+  <table><thead><tr><th scope="col">What</th><th scope="col">Status</th><th scope="col">What it does for you</th></tr></thead><tbody>
+  {% for b in built %}<tr><td><b>{{ b.name }}</b></td><td>{{ ui.pill(b.status) }}</td><td>{{ b.what }}</td></tr>{% endfor %}
+  </tbody></table>
+  {% if timeline %}<h3>How it came together</h3><ol class="timeline">{% for t in timeline %}<li><time>{{ t.date }}</time><span>{{ t.event }}</span></li>{% endfor %}</ol>{% endif %}
+</section>
+
+<section id="learned" aria-labelledby="h-learned">
+  <h2 id="h-learned">What we learned together</h2>
+  {% for c in challenges %}<div class="item"><h3>{{ c.title }}</h3><p style="margin:0">{{ c.detail }}</p>{% if c.result %}<div class="takeaway"><b>Where we landed:</b> {{ c.result }}</div>{% endif %}</div>{% endfor %}
+  {% for w in worked %}<div class="item"><p style="margin:0">{{ w.point }}</p>{% if w.takeaway %}<div class="takeaway"><b>Why it matters:</b> {{ w.takeaway }}</div>{% endif %}</div>{% endfor %}
+</section>
+
+{% if value %}<section id="value" aria-labelledby="h-value">
+  <h2 id="h-value">Value so far</h2>
+  {% if value.expected %}<p class="lede">{{ value.expected }}</p>{% endif %}
+  <ul class="clean">{% for v in value.shown %}<li>{{ v.text }}</li>{% endfor %}</ul>
+</section>{% endif %}
+
+{% if readiness %}<section id="ready" aria-labelledby="h-ready">
+  <h2 id="h-ready">Production readiness</h2>
+  <table><thead><tr><th scope="col">Area</th><th scope="col">Where it stands</th><th scope="col">Notes</th></tr></thead><tbody>
+  {% for r in readiness %}<tr><td>{{ r.area }}</td><td>{{ ui.pill(r.rating) }}</td><td>{{ r.note }}</td></tr>{% endfor %}</tbody></table>
+</section>{% endif %}
+
+<section id="next" aria-labelledby="h-next">
+  <h2 id="h-next">What's next</h2>
+  <p class="lede">{{ direction.summary }}</p>
+  <table><thead><tr><th scope="col">Step</th><th scope="col">Owner</th><th scope="col">By</th></tr></thead><tbody>
+  {% for s in next_steps %}<tr><td>{{ s.step }}</td><td>{{ s.owner }}</td><td>{{ s.date or "To be set" }}</td></tr>{% endfor %}</tbody></table>
+  {% if checkin and checkin.date %}<div class="callout"><span class="label">Check-in</span>We'll meet again around {{ checkin.date }} to review progress, led by {{ checkin.owner }}.</div>{% endif %}
+  {% if m.customer_contacts_sf %}<h3>Your Salesforce team</h3><ul class="clean">{% for t in m.customer_contacts_sf %}<li>{{ t.name }}, {{ t.role }}</li>{% endfor %}</ul>{% endif %}
+</section>
+{% endblock %}
+{% block footer %}Prepared by Salesforce for {{ m.account_short or m.account }}. {{ m.updated }}.{% endblock %}

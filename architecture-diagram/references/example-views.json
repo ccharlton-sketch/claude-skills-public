@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "slug": "northwind",
+    "account": "Northwind",
+    "title": "Broker agents: where we started and where we were headed",
+    "subtitle": "Brokers got intelligence from Northwind's Snowflake data through Data Cloud. First it came through three Employee Agents. Next it was going to come through Agentforce Coworker skills.",
+    "updated": "November 2026"
+  },
+  "legend_labels": {
+    "current": "In place",
+    "cancelled": "Positioned, then cancelled"
+  },
+  "views": [
+    {
+      "title": "First iteration: three Employee Agents",
+      "pill": "BUILT",
+      "pill_state": "current",
+      "intro": "Each use case was its own Employee Agent in the Salesforce sidebar. The agents queried Data Cloud data lake objects that were streamed in from Snowflake.",
+      "zones": [
+        {
+          "id": "people",
+          "label": "People",
+          "nodes": [
+            {
+              "id": "brokers",
+              "title": "Brokers",
+              "sub": "Brokers and analysts researching deals and lending",
+              "icon": "lucide:users"
+            }
+          ]
+        },
+        {
+          "id": "work",
+          "label": "Where they work",
+          "nodes": [
+            {
+              "id": "agents",
+              "title": "Employee Agents",
+              "kind": "list",
+              "sub": "One agent per use case, in the Salesforce sidebar",
+              "icon": "logos:salesforce",
+              "badge": "lucide:bot",
+              "items": [
+                {
+                  "label": "Market Trends",
+                  "icon": "lucide:bot"
+                },
+                {
+                  "label": "Deal Finder",
+                  "icon": "lucide:bot"
+                },
+                {
+                  "label": "Client Research",
+                  "icon": "lucide:bot"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "dc",
+          "label": "Data Cloud",
+          "nodes": [
+            {
+              "id": "dlo",
+              "title": "Data lake objects",
+              "sub": "Snowflake tables landed as DLOs",
+              "icon": "logos:salesforce",
+              "badge": "lucide:database"
+            }
+          ]
+        },
+        {
+          "id": "src",
+          "label": "Source data",
+          "nodes": [
+            {
+              "id": "snow",
+              "title": "Snowflake",
+              "sub": "Northwind's deal, listing and lending data",
+              "icon": "logos:snowflake-icon",
+              "badge": "lucide:database"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "brokers",
+          "to": "agents",
+          "step": 1
+        },
+        {
+          "from": "agents",
+          "to": "dlo",
+          "step": 2,
+          "both": true
+        },
+        {
+          "from": "snow",
+          "to": "dlo",
+          "step": 3
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "title": "Brokers pick an agent",
+          "text": "A broker opens the agent for their question: market trends, loan quotes or client research."
+        },
+        {
+          "n": 2,
+          "title": "The agent queries Data Cloud",
+          "text": "Each agent reads the DLOs directly and summarizes results before they reach the model."
+        },
+        {
+          "n": 3,
+          "title": "Snowflake streams in",
+          "text": "Northwind's Snowflake tables sync into Data Cloud by streaming, so the DLOs stay current."
+        }
+      ]
+    },
+    {
+      "title": "What we positioned: Coworker skills",
+      "pill": "CANCELLED",
+      "pill_state": "cancelled",
+      "intro": "One Coworker experience in place of separate agents. Skills load based on what each person asks for, and they call the same Snowflake-backed data through Data Cloud DMOs.",
+      "zones": [
+        {
+          "id": "people",
+          "label": "People",
+          "nodes": [
+            {
+              "id": "brokers",
+              "title": "Brokers",
+              "sub": "Each person asks for what they need",
+              "icon": "lucide:users"
+            }
+          ]
+        },
+        {
+          "id": "work",
+          "label": "Where they work",
+          "nodes": [
+            {
+              "id": "cw",
+              "title": "Agentforce Coworker",
+              "kind": "list",
+              "state": "cancelled",
+              "tag": "CANCELLED",
+              "sub": "One assistant, skills matched to the request",
+              "icon": "logos:salesforce",
+              "badge": "lucide:sparkles",
+              "items": [
+                {
+                  "label": "Market trends skill",
+                  "icon": "lucide:sparkles"
+                },
+                {
+                  "label": "Deal finding skill",
+                  "icon": "lucide:sparkles"
+                },
+                {
+                  "label": "Client research skill",
+                  "icon": "lucide:sparkles"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "dc",
+          "label": "Data Cloud",
+          "nodes": [
+            {
+              "id": "dmo",
+              "title": "Data model objects",
+              "sub": "The same Snowflake data, mapped to DMOs",
+              "icon": "logos:salesforce",
+              "badge": "lucide:database"
+            }
+          ]
+        },
+        {
+          "id": "src",
+          "label": "Source data",
+          "nodes": [
+            {
+              "id": "snow",
+              "title": "Snowflake",
+              "sub": "Northwind's deal, listing and lending data",
+              "icon": "logos:snowflake-icon",
+              "badge": "lucide:database"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "brokers",
+          "to": "cw",
+          "step": 1,
+          "state": "cancelled"
+        },
+        {
+          "from": "cw",
+          "to": "dmo",
+          "step": 2,
+          "both": true,
+          "state": "cancelled"
+        },
+        {
+          "from": "snow",
+          "to": "dmo",
+          "step": 3
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "state": "cancelled",
+          "title": "One place to ask",
+          "text": "Brokers work in Agentforce Coworker instead of choosing between separate agents."
+        },
+        {
+          "n": 2,
+          "state": "cancelled",
+          "title": "Skills call Data Cloud",
+          "text": "Coworker picks the right skill for the request and reads the Data Cloud DMOs."
+        },
+        {
+          "n": 3,
+          "title": "Same data underneath",
+          "text": "The Snowflake streaming sync stays as it was, so nothing changes at the data layer."
+        }
+      ]
+    }
+  ],
+  "cards_title": "Where it landed",
+  "cards": [
+    {
+      "title": "Built",
+      "text": "Market Trends and Deal Finder ran as Employee Agents on Data Cloud data streamed from Snowflake."
+    },
+    {
+      "title": "Why we moved",
+      "state": "planned",
+      "text": "Separate sidebar agents were doing a job Coworker is built for. Coworker gives one experience with skills per request and the same data underneath."
+    },
+    {
+      "title": "Cancelled",
+      "state": "cancelled",
+      "text": "Northwind paused the program, before the Coworker pilot ran."
+    }
+  ]
+}

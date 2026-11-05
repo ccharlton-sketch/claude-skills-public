@@ -1,0 +1,345 @@
+{
+  "meta": {
+    "slug": "fabrikam",
+    "account": "Fabrikam",
+    "title": "Case classification and knowledge: where we started and what we built",
+    "subtitle": "Help desk email cases get a case type and land in the right queue. First a Prompt Builder template picked the type. Then Einstein Case Classification took over, and Knowledge migrated from OneNote feeds article recommendations.",
+    "updated": "November 2026"
+  },
+  "legend_labels": {
+    "current": "Live",
+    "cancelled": "Replaced",
+    "exploring": "Future option"
+  },
+  "views": [
+    {
+      "title": "First iteration: Prompt Builder classifier",
+      "pill": "REPLACED",
+      "pill_state": "cancelled",
+      "intro": "A record-triggered flow sent each new case to a Prompt Builder template. The template scored it against 12 case types and returned JSON. An Apex class read that JSON and set Case Type, and routing did the rest.",
+      "zones": [
+        {
+          "id": "in",
+          "label": "Sources",
+          "nodes": [
+            {
+              "id": "email",
+              "title": "Help desk inboxes",
+              "sub": "Email-to-Case creates the case",
+              "icon": "lucide:inbox",
+              "badge": "lucide:mail"
+            }
+          ]
+        },
+        {
+          "id": "classify",
+          "label": "Classify",
+          "nodes": [
+            {
+              "id": "flow",
+              "title": "Record-triggered flow",
+              "sub": "Runs on each new case",
+              "icon": "logos:salesforce",
+              "badge": "lucide:workflow"
+            },
+            {
+              "id": "prompt",
+              "title": "Prompt Builder template",
+              "sub": "Picks 1 of 12 case types, returns JSON",
+              "icon": "logos:salesforce",
+              "badge": "lucide:sparkles",
+              "state": "cancelled",
+              "tag": "REPLACED"
+            }
+          ]
+        },
+        {
+          "id": "update",
+          "label": "Update the case",
+          "nodes": [
+            {
+              "id": "apex",
+              "title": "Apex class",
+              "sub": "Reads the JSON, sets Case Type",
+              "icon": "logos:salesforce",
+              "badge": "lucide:braces"
+            }
+          ]
+        },
+        {
+          "id": "route",
+          "label": "Route",
+          "nodes": [
+            {
+              "id": "queues",
+              "title": "Queue routing",
+              "sub": "Case Type decides the queue",
+              "icon": "lucide:users",
+              "badge": "lucide:workflow"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "email",
+          "to": "flow",
+          "step": 1
+        },
+        {
+          "from": "flow",
+          "to": "prompt",
+          "step": 2,
+          "both": true,
+          "state": "cancelled"
+        },
+        {
+          "from": "flow",
+          "to": "apex",
+          "step": 3
+        },
+        {
+          "from": "apex",
+          "to": "queues",
+          "step": 4
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "title": "A case is created",
+          "text": "Email to a help desk inbox becomes a case, which starts the flow."
+        },
+        {
+          "n": 2,
+          "state": "cancelled",
+          "title": "The prompt picks a type",
+          "text": "The flow sends the case details to a Prompt Builder template, which assesses them against 12 case types and returns JSON."
+        },
+        {
+          "n": 3,
+          "title": "Apex updates the case",
+          "text": "An Apex class reads the JSON and sets Case Type on the record."
+        },
+        {
+          "n": 4,
+          "title": "Routing takes over",
+          "text": "Existing routing sends the case to the queue for its case type."
+        }
+      ],
+      "groups": [
+        {
+          "label": "Inside Salesforce: everything here runs on the Case object",
+          "from": "classify",
+          "to": "route",
+          "icon": "logos:salesforce"
+        }
+      ]
+    },
+    {
+      "title": "What we built: Einstein Case Classification and Knowledge",
+      "pill": "LIVE IN PRODUCTION",
+      "pill_state": "current",
+      "intro": "Everything from classification to the technician's work happens in Salesforce, on the Case object. Einstein Case Classification replaced the prompt: it predicts Case Type from 10 fields on the Case, and the same routing sends it to a queue. Help desk technicians pick up the Case in Salesforce, where Einstein Article Recommendations suggests articles from Knowledge migrated out of OneNote.",
+      "zones": [
+        {
+          "id": "src",
+          "label": "Sources",
+          "nodes": [
+            {
+              "id": "email",
+              "title": "Help desk inboxes",
+              "sub": "Email-to-Case creates the case",
+              "icon": "lucide:inbox",
+              "badge": "lucide:mail"
+            },
+            {
+              "id": "sp",
+              "title": "OneNote",
+              "sub": "Where the help desk knowledge lived",
+              "icon": "logos:microsoft-icon",
+              "badge": "lucide:file-text",
+              "gap_before": 70
+            }
+          ]
+        },
+        {
+          "id": "sf",
+          "label": "Einstein and Knowledge",
+          "nodes": [
+            {
+              "id": "ecc",
+              "title": "Einstein Case Classification",
+              "sub": "Predicts Case Type from 10 case fields",
+              "icon": "logos:salesforce",
+              "badge": "lucide:sparkles"
+            },
+            {
+              "id": "kb",
+              "title": "Salesforce Knowledge",
+              "sub": "Migrated and published articles",
+              "icon": "logos:salesforce",
+              "badge": "lucide:book-open",
+              "gap_before": 70
+            }
+          ]
+        },
+        {
+          "id": "out",
+          "label": "On the Case record",
+          "nodes": [
+            {
+              "id": "queues",
+              "title": "Queue routing",
+              "sub": "Case Type decides the queue",
+              "icon": "lucide:users",
+              "badge": "lucide:workflow"
+            },
+            {
+              "id": "recs",
+              "title": "Einstein Article Recommendations",
+              "sub": "Suggests articles on each case",
+              "icon": "logos:salesforce",
+              "badge": "lucide:search",
+              "gap_before": 30
+            },
+            {
+              "id": "dc",
+              "title": "Data Cloud",
+              "sub": "Knowledge grounding for future agents",
+              "icon": "logos:salesforce",
+              "badge": "lucide:database",
+              "state": "exploring",
+              "tag": "FUTURE",
+              "gap_before": 30
+            }
+          ]
+        },
+        {
+          "id": "people",
+          "label": "Who works the Case",
+          "nodes": [
+            {
+              "id": "techs",
+              "title": "Help desk technicians",
+              "sub": "Work each Case in Salesforce from their queue",
+              "icon": "logos:salesforce",
+              "badge": "lucide:headset"
+            },
+            {
+              "id": "agents",
+              "title": "Agentforce agents",
+              "sub": "Answer questions from Knowledge in Salesforce",
+              "icon": "logos:salesforce",
+              "badge": "lucide:bot",
+              "state": "exploring",
+              "tag": "FUTURE",
+              "gap_before": 170
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "email",
+          "to": "ecc",
+          "step": 1
+        },
+        {
+          "from": "ecc",
+          "to": "queues",
+          "step": 2
+        },
+        {
+          "from": "queues",
+          "to": "techs",
+          "step": 3
+        },
+        {
+          "from": "sp",
+          "to": "kb",
+          "step": 4
+        },
+        {
+          "from": "kb",
+          "to": "recs",
+          "step": 5
+        },
+        {
+          "from": "recs",
+          "to": "techs",
+          "dy_to": 20
+        },
+        {
+          "from": "kb",
+          "to": "dc",
+          "step": 6,
+          "state": "exploring"
+        },
+        {
+          "from": "dc",
+          "to": "agents",
+          "state": "exploring"
+        }
+      ],
+      "steps": [
+        {
+          "n": 1,
+          "title": "A case is created",
+          "text": "Email to a help desk inbox becomes a case and Einstein Case Classification scores it."
+        },
+        {
+          "n": 2,
+          "title": "The model sets Case Type",
+          "text": "The model predicts Case Type from 10 fields on the record, with no prompt and no flex credits."
+        },
+        {
+          "n": 3,
+          "title": "Routing takes over",
+          "text": "The same downstream routing sends the Case to the queue for its type, and a help desk technician picks it up and works it in Salesforce."
+        },
+        {
+          "n": 4,
+          "title": "Knowledge moves into Salesforce",
+          "text": "Help desk articles were migrated from OneNote into Salesforce Knowledge and published."
+        },
+        {
+          "n": 5,
+          "title": "Articles are suggested",
+          "text": "Einstein Article Recommendations shows the technician relevant articles right on the Case record."
+        },
+        {
+          "n": 6,
+          "state": "exploring",
+          "title": "Future: Knowledge in Data Cloud",
+          "text": "The same Knowledge can be brought into Data Cloud to ground Agentforce agents that answer questions."
+        }
+      ],
+      "groups": [
+        {
+          "label": "Inside Salesforce: everything here runs on the Case object",
+          "from": "sf",
+          "to": "people",
+          "icon": "logos:salesforce"
+        }
+      ]
+    }
+  ],
+  "cards_title": "Where it landed",
+  "cards": [
+    {
+      "title": "Live",
+      "text": "Einstein Case Classification and Article Recommendations live in Fabrikam's production org on Knowledge migrated into Salesforce, rolling out desk by desk."
+    },
+    {
+      "title": "Why we moved off the prompt",
+      "state": "cancelled",
+      "text": "The Prompt Builder classifier worked, right 70% or more of the time, but every case cost Einstein requests and flex credits, and Fabrikam wanted a predictive model it could keep current as queues change."
+    },
+    {
+      "title": "Future option",
+      "state": "exploring",
+      "text": "Knowledge in Data Cloud to ground Agentforce agents, once Fabrikam decides to take on agentic work."
+    }
+  ]
+}

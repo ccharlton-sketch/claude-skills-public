@@ -1,0 +1,1 @@
+{%- macro pill(s) -%}<span class="pill {{ s }}">{{ {"live_sandbox":"Live in sandbox","live_production":"Live in production","completed":"Completed","in_build":"In build","planned":"Planned","cancelled":"Cancelled","paused":"Paused","ready":"Ready","at_risk":"At risk","blocked":"Blocked"}.get(s, s) }}</span>{%- endmacro -%}
