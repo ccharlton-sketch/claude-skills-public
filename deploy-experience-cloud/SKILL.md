@@ -29,9 +29,14 @@ those are manual steps the user handles themselves in Experience Builder / Digit
 - `--component-name`: LWC name (camelCase). Defaults to `<resourceName>Embed`.
 - `--site-name`: If provided, create a new "Build Your Own (LWR)" Experience Cloud site with this name. If omitted, skip site creation — assume the user already has a site to place the component on themselves.
 - `--url-prefix`: URL path prefix for a new site (only used with `--site-name`). Defaults to a slug of the site name.
-- `--password`: If provided, gate the embed behind a simple password form (plain string compare, unlock persisted per browser session via `sessionStorage`). Omit for no gate. This is a casual deterrent only — see "Password gate" below — so if not given, ask the user whether they want one rather than defaulting either way.
+- `--password`: **Optional.** Only add a password screen if the user explicitly asks for one — either by passing
+  `--password <value>` or by saying so in their request (e.g. "put a password on it", "password protect it").
+  If they ask for a password but don't give the value, ask them for it. If they don't mention a password at all,
+  build the plain embed with **no** password screen and don't prompt about it. The screen is a plain string
+  compare with the unlock remembered per browser session via `sessionStorage` — a casual deterrent only, see
+  "Password gate" below.
 
-Confirm the target org and (if a site will be created) the site name with the user before doing anything — these are the two inputs the user explicitly said they'd provide, don't guess them.
+Confirm the target org and (if a site will be created) the site name with the user before doing anything — don't guess them. Don't add a password question to this confirmation; see `--password` above.
 
 ## Instructions
 
@@ -79,7 +84,7 @@ force-app/main/default/staticresources/<resourceName>.resource-meta.xml
 
 Read `sourceApiVersion` from the project's `sfdx-project.json` and use it in the meta XML.
 
-**No `--password` given** — `force-app/main/default/lwc/<componentName>/<componentName>.js`:
+**No password requested (the default)** — `force-app/main/default/lwc/<componentName>/<componentName>.js`:
 ```js
 import { LightningElement } from 'lwc';
 import RESOURCE from '@salesforce/resourceUrl/<resourceName>';
@@ -101,7 +106,7 @@ export default class <ComponentClassName> extends LightningElement {
 </template>
 ```
 
-**`--password <value>` given** — same iframe, but gated behind a plain password form until it matches, with
+**Password requested** — same iframe, but gated behind a plain password form until it matches, with
 the unlock remembered for the browser session. `<componentName>.js`:
 ```js
 import { LightningElement } from 'lwc';
@@ -127,6 +132,7 @@ export default class <ComponentClassName> extends LightningElement {
 
     handleKeyUp(event) {
         if (event.key === 'Enter') {
+            this.passwordInput = event.target.value;
             this.handleSubmit();
         }
     }
@@ -159,7 +165,7 @@ export default class <ComponentClassName> extends LightningElement {
                 <h2 class="gate-title">This content is password protected</h2>
                 <p class="gate-subtitle">Enter the password to continue.</p>
                 <input type="password" class="gate-input" placeholder="Password" value={passwordInput}
-                       onchange={handleInputChange} onkeyup={handleKeyUp} />
+                       oninput={handleInputChange} onkeyup={handleKeyUp} />
                 <button class="gate-button" onclick={handleSubmit}>Unlock</button>
                 <template if:true={error}>
                     <p class="gate-error">Incorrect password. Try again.</p>
@@ -170,8 +176,74 @@ export default class <ComponentClassName> extends LightningElement {
 </template>
 ```
 
-Plus a `<componentName>.css` with a centered `min-height: 100vh` flex layout and a simple card — see
-`force-app/main/default/lwc/playbookEmbed/playbookEmbed.css` in this project for a working reference.
+Plus `<componentName>.css` for the password screen. If the project already has a password-gated embed
+(look for any `force-app/main/default/lwc/*/*.css` that defines `.gate-card`, e.g.
+`playbookEmbed/playbookEmbed.css`), copy it so the screens match. If there isn't one, which is normal on a
+teammate's machine or a fresh project, create the file with this:
+```css
+.gate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f3f3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.gate-card {
+    width: 320px;
+    padding: 32px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+    text-align: center;
+}
+
+.gate-title {
+    margin: 0 0 8px;
+    font-size: 18px;
+    color: #032d60;
+}
+
+.gate-subtitle {
+    margin: 0 0 20px;
+    font-size: 13px;
+    color: #706e6b;
+}
+
+.gate-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.gate-button {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 4px;
+    background: #0176d3;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.gate-button:hover {
+    background: #014486;
+}
+
+.gate-error {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: #ba0517;
+}
+```
+No password requested means no CSS file is needed.
 
 `<componentName>.js-meta.xml`:
 ```xml
@@ -288,9 +360,13 @@ password string ships in the deployed component and is visible to anyone who ins
 view-source/devtools. Fine for keeping a demo/playbook off casual passersby; never rely on it for anything
 that needs actual access control (use a real authenticated site + profile/permission set for that instead).
 
-To change the password later: edit the `SITE_PASSWORD` constant in `<componentName>.js` and redeploy just
-that component (`sf project deploy start --source-dir "force-app/main/default/lwc/<componentName>" --target-org
-<target-org>`). No resource/site redeploy needed. Remind the user they'll likely need to re-Publish the site
+The password is easy to change, add or remove later. Each case only touches the component, so redeploy just
+that (`sf project deploy start --source-dir "force-app/main/default/lwc/<componentName>" --target-org
+<target-org>`). No resource or site redeploy is needed.
+- **Change it:** edit the `SITE_PASSWORD` constant in `<componentName>.js`.
+- **Add one** to an embed built without it: replace the component's `.js` and `.html` with the password
+  versions above and add the `.css`.
+- **Remove it:** replace the `.js` and `.html` with the plain versions above and delete the `.css`. Remind the user they'll likely need to re-Publish the site
 in Experience Builder for the live URL to reflect it — see "Live site briefly shows the old version" below.
 
 ### Live site briefly shows the old version (or no gate at all) right after a deploy
